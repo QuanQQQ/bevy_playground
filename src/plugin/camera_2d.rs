@@ -4,8 +4,8 @@ use bevy::input::keyboard::*;
 use bevy::prelude::*;
 use bevy_tweening::*;
 use std::time::Duration;
-pub struct CameraPlugin;
-impl Plugin for CameraPlugin {
+pub struct Camera2DPlugin;
+impl Plugin for Camera2DPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         if !app.is_plugin_added::<TweeningPlugin>() {
             app.add_plugins(TweeningPlugin);
@@ -15,7 +15,7 @@ impl Plugin for CameraPlugin {
             component_animator_system::<Velocity>.in_set(AnimationSystem::AnimationUpdate),
         )
         .add_systems(Startup, setup_camera)
-        .add_systems(Update, move_camera);
+        .add_systems(Update, focus_target);
     }
 }
 
@@ -30,9 +30,8 @@ fn setup_camera(mut commands: Commands) {
     );
     let c = &mut commands;
     c.spawn((
-        Camera3dBundle {
-            projection: Projection::Orthographic(OrthographicProjection::default()),
-            transform: Transform::from_xyz(100.0, 200.0, 0.0),
+        Camera2dBundle {
+            transform: Transform::from_xyz(0.0, 0.0, 1.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
         Velocity(0.0, 0.0),
@@ -41,7 +40,20 @@ fn setup_camera(mut commands: Commands) {
     ));
 }
 
-fn move_camera(
+fn focus_target(
+    mut set: ParamSet<(
+        Query<&Transform, With<CameraTarget>>,
+        Query<&mut Transform, With<CameraMarker>>,
+    )>,
+) {
+    let target = set.p0();
+    let target_trans = target.get_single().unwrap().clone();
+    let mut camera = set.p1();
+    let mut camera_trans = camera.get_single_mut().unwrap();
+    camera_trans.translation = target_trans.translation;
+}
+
+fn move_camera_by_input(
     mut camera_trans: Query<
         (&mut Transform, &mut Velocity, &mut Animator<Velocity>),
         With<CameraMarker>,
@@ -50,7 +62,7 @@ fn move_camera(
     inputs: Res<ButtonInput<KeyCode>>,
     mut inputs_event: EventReader<KeyboardInput>,
 ) {
-    let v = 800.0;
+    let v = 600.0;
     let delta = time.delta_seconds();
     let (mut mut_trans, mut_velocity, mut animator) =
         camera_trans.get_single_mut().expect("Single camera");
@@ -60,7 +72,6 @@ fn move_camera(
     if inputs_event.read().any(|input| {
         [KeyCode::KeyW, KeyCode::KeyS, KeyCode::KeyA, KeyCode::KeyD].contains(&input.key_code)
     }) {
-        dbg!(&inputs);
         for input in inputs.get_pressed().into_iter() {
             match input {
                 KeyCode::KeyW => y_delta += 1.0,
@@ -70,7 +81,6 @@ fn move_camera(
                 _ => {}
             }
         }
-        dbg!(Velocity(x_delta * v, y_delta * v));
 
         animator.set_tweenable(Tween::new(
             EaseFunction::QuadraticOut,

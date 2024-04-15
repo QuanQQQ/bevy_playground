@@ -7,8 +7,12 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.13.2"
+bevy-inspector-egui = "0.23.4"
 bevy_easings = "0.13.1"
+bevy_entitiles = {version = "0.8.0", features = ["tiled"]}
+bevy_panorbit_camera = "0.17.0"
 bevy_tweening = "0.10.0"
+bevy_xpbd_2d = "0.4"
 
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
