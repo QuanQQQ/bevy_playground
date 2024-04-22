@@ -1,33 +1,37 @@
-use bevy::{
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-    window::WindowResolution,
-};
+use bevy::{prelude::*, window::WindowResolution};
+use bevy_editor_pls::EditorPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_tweening::*;
 use bevy_xpbd_2d::prelude::*;
 mod component;
+mod constants;
 mod plugin;
 mod resource;
+mod system_sets;
 mod utils;
 
 use component::*;
 use plugin::*;
 use resource::*;
+use seldom_state::StateMachinePlugin;
+use system_sets::*;
 use utils::*;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(PhysicsPlugins::default())
         .insert_resource(Gravity(Vec2::ZERO))
+        .add_plugins(ActionPlugin)
         .add_systems(Startup, init)
-        .insert_resource(GreetTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
-        .add_plugins(TweeningPlugin)
-        .add_plugins(Camera2DPlugin)
+        .add_plugins(Camera2DPlugin::<FocusCamera>::default())
         .add_plugins(WorldInspectorPlugin::default())
         .add_plugins(WorldPlugin)
         .add_plugins(MainCharacterPlugin)
+        .add_plugins(ConfigureSetPlugin)
+        .add_plugins(SoilPlugin)
+        .add_plugins(StateMachinePlugin)
+        .add_plugins(CustomDebugPlugin)
         .register_type::<Species>()
+        .register_type::<Towards>()
         .run();
 }
 

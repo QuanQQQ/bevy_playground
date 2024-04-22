@@ -1,14 +1,10 @@
 use bevy::prelude::*;
 use bevy_tweening::Lens;
-use bevy_xpbd_2d::{
-    components::{ColliderDensity, LinearDamping, LinearVelocity, RigidBody},
-    plugins::collision::Collider,
-};
 
 #[derive(Component)]
 pub struct CameraMarker;
 
-#[derive(Component, Clone, Debug, Default)]
+#[derive(Component, Clone, Copy, Debug, Default, Reflect)]
 pub struct Velocity(pub f32, pub f32);
 
 pub struct CameraVelocityLens {
@@ -29,58 +25,33 @@ pub struct Ground;
 #[derive(Component)]
 pub struct CameraTarget;
 
-#[derive(Component, Debug, Reflect)]
-#[reflect(Component)]
-pub enum Species {
-    Human,
-    Animal,
-}
-#[derive(Bundle, Debug)]
-pub struct OrganismBundle {
-    pub entity_name: Name,
-    pub species: Species,
-    pub rigid: RigidBody,
-    pub collider: Collider,
-    pub density: ColliderDensity,
-    pub linear_velocity: LinearVelocity,
-    pub linear_damping: LinearDamping,
-}
-impl Default for OrganismBundle {
-    fn default() -> Self {
-        Self {
-            entity_name: Name::new("Human"),
-
-            species: Species::Human,
-            rigid: RigidBody::Dynamic,
-            collider: Collider::circle(50.0),
-            density: ColliderDensity(0.5),
-            linear_velocity: LinearVelocity(Vec2::ZERO),
-            linear_damping: LinearDamping(1.0),
-        }
-    }
-}
-impl OrganismBundle {
-    pub fn animal() -> Self {
-        Self {
-            entity_name: Name::new("Animal"),
-            species: Species::Animal,
-            rigid: RigidBody::Dynamic,
-            ..default()
-        }
-    }
-    pub fn collider_radius(mut self, radius: f32) -> Self {
-        self.collider = Collider::circle(radius);
-        self
-    }
-    pub fn collider_density(mut self, density: f32) -> Self {
-        self.density = ColliderDensity(density);
-        self
-    }
-    pub fn with_rigid(mut self, rigid: RigidBody) -> Self {
-        self.rigid = rigid;
-        self
-    }
-}
-
 #[derive(Component, Default, Debug, Clone)]
 pub struct Controllable;
+
+#[derive(Component, Clone, Copy, Default, Debug, Reflect)]
+pub struct Tool;
+
+#[derive(Component, Clone, Default, Copy, Debug, Reflect)]
+pub enum Towards {
+    Up,
+    #[default]
+    Down,
+    Left,
+    Right,
+}
+impl Towards {
+    pub fn to_direction2d(self: Self) -> Direction2d {
+        match self {
+            Towards::Down => Direction2d::NEG_Y,
+            Towards::Left => Direction2d::NEG_X,
+            Towards::Right => Direction2d::X,
+            Towards::Up => Direction2d::Y,
+        }
+    }
+}
+
+mod organism_bundle;
+mod soil;
+
+pub use organism_bundle::*;
+pub use soil::*;
