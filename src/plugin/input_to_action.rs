@@ -1,5 +1,5 @@
-use crate::{states::MyAppState, Controllable, InitProcess, Tool, Velocity};
-use bevy::{prelude::*, transform::commands};
+use crate::{states::MyAppState, Controllable, InitProcess};
+use bevy::prelude::*;
 use leafwing_input_manager::{
     input_map::InputMap, plugin::InputManagerPlugin, Actionlike, InputManagerBundle,
 };

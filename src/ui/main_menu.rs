@@ -1,10 +1,11 @@
-use bevy::prelude::*;
+use bevy::{app::AppExit, prelude::*};
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 use crate::states::{MainMenuState, MyAppState};
 
 #[derive(Component)]
 enum MenuButtonAction {
     Play,
+    Quit,
 }
 pub struct MainMenuPlugin;
 
@@ -86,7 +87,6 @@ fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
                     // Display three buttons for each action available from the main menu:
                     // - new game
-                    // - settings
                     // - quit
                     parent
                         .spawn((
@@ -101,6 +101,19 @@ fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 "New Game",
                                 button_text_style.clone(),
                             ));
+                        });
+
+                    parent
+                        .spawn((
+                            ButtonBundle {
+                                style: button_style.clone(),
+                                ..default()
+                            },
+                            MenuButtonAction::Quit,
+                        ))
+                        .with_children(|parent| {
+                            parent
+                                .spawn(TextBundle::from_section("Quit", button_text_style.clone()));
                         });
                 });
         });
@@ -130,7 +143,7 @@ fn menu_action(
         (&Interaction, &MenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
-    // mut app_exit_events: EventWriter<AppExit>,
+    mut app_exit_events: EventWriter<AppExit>,
     mut menu_state: ResMut<NextState<MainMenuState>>,
     mut game_state: ResMut<NextState<MyAppState>>,
 ) {
@@ -140,6 +153,9 @@ fn menu_action(
                 MenuButtonAction::Play => {
                     game_state.set(MyAppState::InGame);
                     menu_state.set(MainMenuState::Disabled);
+                }
+                MenuButtonAction::Quit => {
+                    app_exit_events.send(AppExit);
                 }
             }
         }

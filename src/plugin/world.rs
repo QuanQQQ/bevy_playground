@@ -1,18 +1,13 @@
 use crate::{
-    constants::{
-        CHARACTOR_HEIGHT, CHARACTOR_WIDTH, FIRST_LAYER, MAP_HEIGHT, MAP_WIDTH, SECOND_LAYER,
-        TILE_SIZE,
-    },
+    constants::{CHARACTER_HEIGHT, CHARACTER_WIDTH, FIRST_LAYER, MAP_HEIGHT, MAP_WIDTH, TILE_SIZE},
     states::MyAppState,
-    CameraTarget, Controllable, Ground, InitProcess, OrganismBundle, Soil, Species, TransformInMap,
-    Unreclaimed,
+    utils::transform_in_map::*,
+    CameraTarget, Controllable, Ground, InitProcess, OrganismBundle, Soil, Unreclaimed,
 };
 use bevy::{
     prelude::*,
-    render::view::RenderLayers,
-    sprite::{MaterialMesh2dBundle, Mesh2d, Mesh2dHandle},
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
-use bevy_entitiles::{prelude::*, tilemap::EntiTilesTilemapPlugin, EntiTilesPlugin};
 use bevy_xpbd_2d::{components::RigidBody, plugins::collision::Collider};
 
 pub struct WorldPlugin;
@@ -112,7 +107,7 @@ fn spawn_main_character(
     commands
         .spawn((
             OrganismBundle::human()
-                .with_collider(Collider::rectangle(CHARACTOR_WIDTH, CHARACTOR_HEIGHT)),
+                .with_collider(Collider::rectangle(CHARACTER_WIDTH, CHARACTER_HEIGHT)),
             SpatialBundle::from_transform(Transform::from_map_pos(1, 1, 1.)),
             Controllable,
             CameraTarget,
@@ -120,8 +115,8 @@ fn spawn_main_character(
         .with_children(|parent| {
             parent.spawn((MaterialMesh2dBundle {
                 mesh: Mesh2dHandle(meshes.add(Rectangle::from_size(Vec2::new(
-                    CHARACTOR_WIDTH,
-                    CHARACTOR_HEIGHT,
+                    CHARACTER_WIDTH,
+                    CHARACTER_HEIGHT,
                 )))),
                 material: color_mat.add(Color::GRAY),
                 transform: Transform::from_xyz(0., 0., 0.),

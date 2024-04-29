@@ -1,11 +1,10 @@
 use bevy::prelude::*;
-use bevy_entitiles::math::extension::F32Integerize;
 use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
 
-use crate::*;
+use crate::{utils::transform_in_map::*, *};
 
-use self::constants::{CHARACTOR_HEIGHT, CHARACTOR_WIDTH, TILE_SIZE};
+use self::constants::{CHARACTER_HEIGHT, CHARACTER_WIDTH, TILE_SIZE};
 
 pub struct MainCharacterPlugin;
 
@@ -59,16 +58,16 @@ fn use_tool(
     let affect_trans = Transform::from_translation(
         transform.translation
             + match towards {
-                Towards::Down => Vec3::new(0., -CHARACTOR_HEIGHT / 4. - TILE_SIZE / 2., 0.),
-                Towards::Up => Vec3::new(0., -CHARACTOR_HEIGHT / 4. + TILE_SIZE / 2., 0.),
+                Towards::Down => Vec3::new(0., -CHARACTER_HEIGHT / 4. - TILE_SIZE / 2., 0.),
+                Towards::Up => Vec3::new(0., -CHARACTER_HEIGHT / 4. + TILE_SIZE / 2., 0.),
                 Towards::Left => Vec3::new(
-                    -CHARACTOR_WIDTH / 2. - TILE_SIZE / 2.,
-                    -CHARACTOR_HEIGHT / 4.,
+                    -CHARACTER_WIDTH / 2. - TILE_SIZE / 2.,
+                    -CHARACTER_HEIGHT / 4.,
                     0.,
                 ),
                 Towards::Right => Vec3::new(
-                    CHARACTOR_WIDTH / 2. + TILE_SIZE / 2.,
-                    -CHARACTOR_HEIGHT / 4.,
+                    CHARACTER_WIDTH / 2. + TILE_SIZE / 2.,
+                    -CHARACTER_HEIGHT / 4.,
                     0.,
                 ),
             },

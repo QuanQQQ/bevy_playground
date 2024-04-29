@@ -7,7 +7,7 @@ impl Plugin for CustomDebugPlugin {
     }
 }
 pub fn represent_towards(
-    query: Query<(&Towards, &Children), (Changed<Towards>)>,
+    query: Query<(&Towards, &Children), Changed<Towards>>,
     mut text: Query<&mut Text>,
 ) {
     for (toward, children) in query.iter() {

@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::{
     components::{
-        AngularDamping, AngularVelocity, ColliderDensity, LinearDamping, LinearVelocity,
-        LockedAxes, RigidBody,
+        AngularDamping, ColliderDensity, LinearDamping, LinearVelocity, LockedAxes, RigidBody,
     },
     plugins::collision::Collider,
 };
