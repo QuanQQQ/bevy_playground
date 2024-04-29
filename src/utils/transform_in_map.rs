@@ -9,7 +9,11 @@ pub trait TransformInMap {
 }
 impl TransformInMap for Transform {
     fn from_map_pos(x: i32, y: i32, z: f32) -> Transform {
-        Transform::from_xyz(x as f32 * TILE_SIZE, y as f32 * TILE_SIZE, z)
+        Transform::from_xyz(
+            x as f32 * TILE_SIZE + TILE_SIZE / 2.,
+            y as f32 * TILE_SIZE + TILE_SIZE / 2.,
+            z,
+        )
     }
     fn to_map_pos(self: &Self) -> (i32, i32) {
         (

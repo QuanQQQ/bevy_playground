@@ -1,5 +1,9 @@
 use crate::{
-    constants::{FIRST_LAYER, MAP_HEIGHT, MAP_WIDTH, SECOND_LAYER, TILE_SIZE},
+    constants::{
+        CHARACTOR_HEIGHT, CHARACTOR_WIDTH, FIRST_LAYER, MAP_HEIGHT, MAP_WIDTH, SECOND_LAYER,
+        TILE_SIZE,
+    },
+    states::MyAppState,
     CameraTarget, Controllable, Ground, InitProcess, OrganismBundle, Soil, Species, TransformInMap,
     Unreclaimed,
 };
@@ -16,7 +20,7 @@ pub struct WorldPlugin;
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(
-            Startup,
+            OnEnter(MyAppState::InGame),
             (spawn_town, spawn_main_character)
                 .chain()
                 .in_set(InitProcess::SpawnEntity),
@@ -51,36 +55,30 @@ fn spawn_town(
             ..default()
         },
         Ground,
+        FIRST_LAYER,
     ));
 
-    for i in 135..155 {
-        for j in 475..485 {
+    for i in 1..20 {
+        for j in 1..20 {
             commands
                 .spawn((
                     Soil::default().with_transform(Transform::from_map_pos(i, j, 0.)),
                     Unreclaimed,
-                    FIRST_LAYER,
                 ))
                 .with_children(|parent| {
-                    parent.spawn((
-                        MaterialMesh2dBundle {
-                            material: color_materials.add(Color::rgb(0.23, 0.52, 0.95)),
-                            mesh: Mesh2dHandle(
-                                meshes.add(Rectangle::from_size(Vec2::splat(TILE_SIZE))),
-                            ),
-                            ..default()
-                        },
-                        FIRST_LAYER,
-                    ));
-                    parent.spawn((
-                        Text2dBundle {
-                            text: Text::from_section("Soil", TextStyle::default())
-                                .with_justify(JustifyText::Center),
-                            transform: Transform::from_xyz(0., 0., 1.),
-                            ..default()
-                        },
-                        FIRST_LAYER,
-                    ));
+                    parent.spawn((MaterialMesh2dBundle {
+                        material: color_materials.add(Color::rgb(0.23, 0.52, 0.95)),
+                        mesh: Mesh2dHandle(
+                            meshes.add(Rectangle::from_size(Vec2::splat(TILE_SIZE))),
+                        ),
+                        ..default()
+                    },));
+                    parent.spawn((Text2dBundle {
+                        text: Text::from_section("Soil", TextStyle::default())
+                            .with_justify(JustifyText::Center),
+                        transform: Transform::from_xyz(0., 0., 1.),
+                        ..default()
+                    },));
                 });
         }
     }
@@ -88,23 +86,21 @@ fn spawn_town(
     commands.spawn((
         SpriteBundle {
             texture: asset_server.load("animal/chick.png"),
-            transform: Transform::from_map_pos(132, 480, 0.).with_scale(Vec3::splat(0.2)),
+            transform: Transform::from_map_pos(25, 25, 0.).with_scale(Vec3::splat(0.2)),
             ..default()
         },
         OrganismBundle::animal().collider_radius(TILE_SIZE),
-        SECOND_LAYER,
     ));
 
     commands.spawn((
         SpriteBundle {
             texture: asset_server.load("animal/chick.png"),
-            transform: Transform::from_map_pos(135, 480, 0.).with_scale(Vec3::splat(0.2)),
+            transform: Transform::from_map_pos(26, 26, 0.).with_scale(Vec3::splat(0.2)),
             ..default()
         },
         OrganismBundle::animal()
             .collider_radius(TILE_SIZE)
             .with_rigid(RigidBody::Static),
-        SECOND_LAYER,
     ));
 }
 
@@ -115,30 +111,27 @@ fn spawn_main_character(
 ) {
     commands
         .spawn((
-            OrganismBundle::human().with_collider(Collider::rectangle(24., 48.)),
-            SpatialBundle::from_transform(Transform::from_map_pos(150, 470, 0.)),
+            OrganismBundle::human()
+                .with_collider(Collider::rectangle(CHARACTOR_WIDTH, CHARACTOR_HEIGHT)),
+            SpatialBundle::from_transform(Transform::from_map_pos(1, 1, 1.)),
             Controllable,
             CameraTarget,
-            SECOND_LAYER,
         ))
         .with_children(|parent| {
-            parent.spawn((
-                MaterialMesh2dBundle {
-                    mesh: Mesh2dHandle(meshes.add(Rectangle::from_size(Vec2::new(24., 48.)))),
-                    material: color_mat.add(Color::GRAY),
-                    transform: Transform::from_xyz(0., 0., 0.),
-                    ..default()
-                },
-                SECOND_LAYER,
-            ));
-            parent.spawn((
-                Text2dBundle {
-                    text: Text::from_section("down", TextStyle::default())
-                        .with_justify(JustifyText::Center),
-                    transform: Transform::from_xyz(0., 0., 1.),
-                    ..default()
-                },
-                SECOND_LAYER,
-            ));
+            parent.spawn((MaterialMesh2dBundle {
+                mesh: Mesh2dHandle(meshes.add(Rectangle::from_size(Vec2::new(
+                    CHARACTOR_WIDTH,
+                    CHARACTOR_HEIGHT,
+                )))),
+                material: color_mat.add(Color::GRAY),
+                transform: Transform::from_xyz(0., 0., 0.),
+                ..default()
+            },));
+            parent.spawn((Text2dBundle {
+                text: Text::from_section("down", TextStyle::default())
+                    .with_justify(JustifyText::Center),
+                transform: Transform::from_xyz(0., 0., 1.),
+                ..default()
+            },));
         });
 }

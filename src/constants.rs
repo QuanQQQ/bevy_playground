@@ -6,3 +6,6 @@ pub const MAP_HEIGHT: i32 = 500;
 
 pub const FIRST_LAYER: RenderLayers = RenderLayers::layer(0);
 pub const SECOND_LAYER: RenderLayers = RenderLayers::layer(1);
+
+pub const CHARACTOR_HEIGHT: f32 = 64.;
+pub const CHARACTOR_WIDTH: f32 = 32.;

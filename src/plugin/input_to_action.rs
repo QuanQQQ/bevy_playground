@@ -1,4 +1,4 @@
-use crate::{Controllable, InitProcess, Tool, Velocity};
+use crate::{states::MyAppState, Controllable, InitProcess, Tool, Velocity};
 use bevy::{prelude::*, transform::commands};
 use leafwing_input_manager::{
     input_map::InputMap, plugin::InputManagerPlugin, Actionlike, InputManagerBundle,
@@ -33,7 +33,7 @@ impl Plugin for ActionPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<Action>::default())
             .add_systems(
-                Startup,
+                OnEnter(MyAppState::InGame),
                 init_action_for_main.in_set(InitProcess::InputManager),
             );
     }

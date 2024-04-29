@@ -5,22 +5,24 @@ use leafwing_input_manager::action_state::ActionState;
 
 use crate::*;
 
+use self::constants::{CHARACTOR_HEIGHT, CHARACTOR_WIDTH, TILE_SIZE};
+
 pub struct MainCharacterPlugin;
 
 impl Plugin for MainCharacterPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (move_character, use_tool));
+        app.add_systems(
+            Update,
+            (move_character, use_tool).in_set(GameProcess::MainCharacterUpdate),
+        );
     }
 }
 fn direction_to_towards(direction: Direction2d) -> Towards {
-    if (direction.x > 0. && direction.y == 0.) {
-        Towards::Right
-    } else if direction.x < 0. && direction.y == 0. {
-        Towards::Left
-    } else if direction.x == 0. && direction.y > 0. {
-        Towards::Up
-    } else {
-        Towards::Down
+    match (direction.x, direction.y) {
+        (x, y) if x > 0. => Towards::Right,
+        (x, y) if x < 0. => Towards::Left,
+        (x, y) if y > 0. => Towards::Up,
+        _ => Towards::Down,
     }
 }
 fn move_character(
@@ -30,7 +32,7 @@ fn move_character(
     >,
 ) {
     let (mut velocity, action_state, mut towards) = mc.get_single_mut().unwrap();
-    let scale: f32 = 10.00;
+    let scale: f32 = 40.00;
     for action in Action::DIRECTIONS {
         if action_state.pressed(&action) {
             let direction = action.direction();
@@ -54,8 +56,24 @@ fn use_tool(
     let (action_state, transform, towards) = mc
         .get_single_mut()
         .expect("There should be exact one main charactor");
-    let mc_pos = transform.to_map_pos();
-    let forward_dir = towards.to_direction2d();
+    let affect_trans = Transform::from_translation(
+        transform.translation
+            + match towards {
+                Towards::Down => Vec3::new(0., -CHARACTOR_HEIGHT / 4. - TILE_SIZE / 2., 0.),
+                Towards::Up => Vec3::new(0., -CHARACTOR_HEIGHT / 4. + TILE_SIZE / 2., 0.),
+                Towards::Left => Vec3::new(
+                    -CHARACTOR_WIDTH / 2. - TILE_SIZE / 2.,
+                    -CHARACTOR_HEIGHT / 4.,
+                    0.,
+                ),
+                Towards::Right => Vec3::new(
+                    CHARACTOR_WIDTH / 2. + TILE_SIZE / 2.,
+                    -CHARACTOR_HEIGHT / 4.,
+                    0.,
+                ),
+            },
+    );
+    let affect_pos = affect_trans.to_map_pos();
     for action in Action::USE {
         if action_state.just_pressed(&action) {
             match action {
@@ -63,31 +81,14 @@ fn use_tool(
                     for (entity, transform) in unreclaimed_soil.iter() {
                         let soil_pos = transform.to_map_pos();
 
-                        if soil_pos
-                            == (
-                                mc_pos.0 + forward_dir.x.floor_to_i32(),
-                                mc_pos.1 + forward_dir.y.floor_to_i32(),
-                            )
-                        {
-                            dbg!(
-                                soil_pos,
-                                forward_dir.x.floor_to_i32(),
-                                forward_dir.y.floor_to_i32(),
-                                mc_pos.0 + forward_dir.x.floor_to_i32(),
-                                mc_pos.1 + forward_dir.y.floor_to_i32(),
-                            );
+                        if soil_pos == affect_pos {
                             ew.send(SoilEvent::Reclaim(entity));
                             return;
                         }
                     }
                     for (entity, transform) in reclaimed_soil.iter() {
                         let soil_pos = transform.to_map_pos();
-                        if soil_pos
-                            == (
-                                mc_pos.0 + forward_dir.x.floor_to_i32(),
-                                mc_pos.1 + forward_dir.y.floor_to_i32(),
-                            )
-                        {
+                        if soil_pos == affect_pos {
                             ew.send(SoilEvent::Unreclaim(entity));
                             return;
                         }
@@ -97,24 +98,14 @@ fn use_tool(
                 Action::Plant => {
                     for (entity, transform) in reclaimed_soil.iter() {
                         let soil_pos = transform.to_map_pos();
-                        if soil_pos
-                            == (
-                                mc_pos.0 + forward_dir.x.floor_to_i32(),
-                                mc_pos.1 + forward_dir.y.floor_to_i32(),
-                            )
-                        {
+                        if soil_pos == affect_pos {
                             ew.send(SoilEvent::Plant(entity));
                             return;
                         }
                     }
                     for (entity, transform) in planted_soil.iter() {
                         let soil_pos = transform.to_map_pos();
-                        if soil_pos
-                            == (
-                                mc_pos.0 + forward_dir.x.floor_to_i32(),
-                                mc_pos.1 + forward_dir.y.floor_to_i32(),
-                            )
-                        {
+                        if soil_pos == affect_pos {
                             ew.send(SoilEvent::Unplant(entity));
                             return;
                         }

@@ -38,7 +38,7 @@ impl Default for OrganismBundle {
             collider: Collider::rectangle(TILE_SIZE, TILE_SIZE),
             density: ColliderDensity(0.5),
             linear_velocity: LinearVelocity(Vec2::ZERO),
-            linear_damping: LinearDamping(4.0),
+            linear_damping: LinearDamping(10.0),
             angular_damping: AngularDamping(1000000.),
             towards: Towards::default(),
             locked: LockedAxes::ROTATION_LOCKED,
